@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <style>
+        html {
+            box-sizing: border-box;
+            height: 100%;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: inherit;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            align-items: center;
+            background: linear-gradient(320deg, #1e90ff, #32cd32, #63c9b4);
+            display: flex;
+            font-family: 'Arial', sans-serif;
+            height: 100%;
+            justify-content: center;
+        }
+
+        .wrapper {
+            background: rgba(255, 255, 255, 0.75);
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(35, 35, 35, 0.1);
+            color: #232323;
+            width: 350px;
+            padding: 20px;
+        }
+
+        .screen {
+            background: #f0f0f0;
+            border-radius: 8px;
+            font-size: 2rem;
+            text-align: right;
+            padding: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .calc-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            background: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            padding: 15px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #f0f0f0;
+        }
+
+        button:active {
+            background: #e0e0e0;
+        }
+
+        .double {
+            grid-column: span 2;
+        }
+
+        .triple {
+            grid-column: span 3;
+        }
+
+        .operator {
+            background: #f9d71c;
+        }
+
+        .operator:hover {
+            background: #f8c146;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="screen">0</div>
+        <div class="calc-buttons">
+            <button class="double">C</button>
+            <button>←</button>
+            <button class="operator">÷</button>
+            <button>7</button>
+            <button>8</button>
+            <button>9</button>
+            <button class="operator">×</button>
+            <button>4</button>
+            <button>5</button>
+            <button>6</button>
+            <button class="operator">-</button>
+            <button>1</button>
+            <button>2</button>
+            <button>3</button>
+            <button class="operator">+</button>
+            <button class="triple">0</button>
+            <button class="operator">=</button>
+        </div>
+    </div>
+    <script>
+        let runningTotal = 0;
+        let buffer = "0";
+        let previousOperator = null;
+
+        const screen = document.querySelector(".screen");
+
+        function buttonClick(value) {
+            if (isNaN(value)) {
+                // Si no es un número, es un símbolo
+                handleSymbol(value);
+            } else {
+                // Si es un número
+                handleNumber(value);
+            }
+            screen.innerText = buffer;
+        }
+
+        function handleSymbol(symbol) {
+            switch (symbol) {
+                case "C":
+                    buffer = "0";
+                    runningTotal = 0;
+                    previousOperator = null;
+                    break;
+                case "←":
+                    if (buffer.length === 1) {
+                        buffer = "0";
+                    } else {
+                        buffer = buffer.slice(0, -1);
+                    }
+                    break;
+                case "=":
+                    if (previousOperator === null) {
+                        return;
+                    }
+                    flushOperation(parseInt(buffer));
+                    previousOperator = null;
+                    buffer = "" + runningTotal;
+                    runningTotal = 0;
+                    break;
+                case "+":
+                case "-":
+                case "×":
+                case "÷":
+                    handleMath(symbol);
+                    break;
+            }
+        }
+
+        function handleMath(symbol) {
+            if (buffer === "0") {
+                // No hacemos nada si el buffer es 0
+                return;
+            }
+
+            const intBuffer = parseInt(buffer);
+
+            if (runningTotal === 0) {
+                runningTotal = intBuffer;
+            } else {
+                flushOperation(intBuffer);
+            }
+
+            previousOperator = symbol;
+            buffer = "0";
+        }
+
+        function flushOperation(intBuffer) {
+            if (previousOperator === "+") {
+                runningTotal += intBuffer;
+            } else if (previousOperator === "-") {
+                runningTotal -= intBuffer;
+            } else if (previousOperator === "×") {
+                runningTotal *= intBuffer;
+            } else if (previousOperator === "÷") {
+                runningTotal /= intBuffer;
+            }
+        }
+
+        function handleNumber(numberString) {
+            if (buffer === "0") {
+                buffer = numberString;
+            } else {
+                buffer += numberString;
+            }
+        }
+
+        function init() {
+            document.querySelector(".calc-buttons").addEventListener("click", function (event) {
+                if (!event.target.matches("button")) {
+                    return;
+                }
+                buttonClick(event.target.innerText.trim());
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>
